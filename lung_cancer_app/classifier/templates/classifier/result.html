@@ -1,3 +1,177 @@
-<h1>Classification Result:</h1>
-<p>{{ result }}</p>
-<a href="{% url 'upload_image' %}">Classify another image</a>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Classification Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div
+        class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl"
+      >
+        <div class="p-8">
+          <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+              Classification Result
+            </h1>
+            <div class="mt-6 p-4 bg-indigo-50 rounded-lg">
+              <p class="text-lg font-semibold text-gray-700">{{ result }}</p>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+            <a
+              href="{% url 'upload_image' %}"
+              class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+            >
+              Classify another image
+            </a>
+
+            <!-- Download button -->
+            <button
+              onclick="downloadResult()"
+              class="inline-flex justify-center py-3 px-6 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+            >
+              <svg
+                class="-ml-1 mr-2 h-5 w-5 text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Download Result
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div
+          class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl"
+        >
+          <div class="p-8">
+            <div class="text-center mb-8">
+              <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                Classification Result
+              </h1>
+              <div
+                class="mt-6 p-4 {% if result == 'lung_normal' %}bg-green-50{% else %}bg-red-50{% endif %} rounded-lg"
+              >
+                <p
+                  class="text-lg font-semibold {% if result == 'lung_normal' %}text-green-700{% else %}text-red-700{% endif %}"
+                >
+                  Result: {{ result|title }}
+                </p>
+
+                <!-- Medical Recommendations -->
+                <div class="mt-4 text-left">
+                  {% if result == 'lung_normal' %}
+                  <div class="text-green-700">
+                    <p class="font-medium">Healthy Lung Detected</p>
+                    <ul class="list-disc pl-5 mt-2 space-y-1 text-sm">
+                      <li>Continue regular check-ups</li>
+                      <li>
+                        Maintain a diet rich in antioxidants (berries, nuts,
+                        leafy greens)
+                      </li>
+                      <li>Avoid smoking and secondhand smoke</li>
+                      <li>Exercise regularly to maintain lung capacity</li>
+                    </ul>
+                  </div>
+                  {% else %}
+                  <div class="text-red-700">
+                    <p class="font-medium">Medical Attention Required</p>
+                    <ul class="list-disc pl-5 mt-2 space-y-1 text-sm">
+                      <li>Please consult an oncologist immediately</li>
+                      <li>Schedule a follow-up biopsy for confirmation</li>
+                      <li>Bring all medical records to your appointment</li>
+                      <li>
+                        Contact emergency services if experiencing severe
+                        symptoms
+                      </li>
+                    </ul>
+                    <div class="mt-3 p-3 bg-red-100 rounded">
+                      <p class="font-bold">Emergency Contacts:</p>
+                      <p class="text-sm">Oncology Department: (555) 123-4567</p>
+                      <p class="text-sm">
+                        24/7 Cancer Helpline: 1-800-XXX-XXXX
+                      </p>
+                    </div>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+              <a
+                href="{% url 'upload_image' %}"
+                class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+              >
+                Analyze Another Image
+              </a>
+
+              {% if result != 'lung_normal' %}
+              <a
+                href="https://www.cancer.org/find-a-doctor.html"
+                target="_blank"
+                class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
+              >
+                Find an Oncologist
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function downloadResult() {
+        // Create a text file with the classification result
+        const resultText = `Classification Result:\n\n{{ result }}\n\nDate: ${new Date().toLocaleString()}`;
+        const blob = new Blob([resultText], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `classification_result_${new Date()
+          .toISOString()
+          .slice(0, 10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Optional: Add analytics or tracking
+        console.log("Result downloaded:", "{{ result }}");
+      }
+
+      // Optional: Add animation to the result display
+      document.addEventListener("DOMContentLoaded", () => {
+        const resultDiv = document.querySelector(".bg-indigo-50");
+        if (resultDiv) {
+          resultDiv.classList.add("animate-pulse");
+          setTimeout(() => {
+            resultDiv.classList.remove("animate-pulse");
+          }, 1000);
+        }
+      });
+    </script>
+  </body>
+</html>
