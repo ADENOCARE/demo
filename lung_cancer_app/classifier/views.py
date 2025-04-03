@@ -63,16 +63,16 @@ def account_view(request):
 def logout_view(request):
     # Log out the user
     logout(request)
-    return redirect("index")
+    return redirect("home")
 
-@login_required
 def home(request):
     return render(request, 'classifier/home.html')
 
-def symptom_checker(request):
-    return render(request, 'classifier/symptom_checker.html')
+@login_required
+def voice_chatbot(request):
+    return render(request, 'classifier/voice_chatbot.html')
 
-
+@login_required
 def community(request):
     stories = Story.objects.all().order_by('-created_at')
     return render(request, 'classifier/community.html', {'stories': stories})
@@ -87,7 +87,7 @@ def share_story(request):
         form = StoryForm()
     return render(request, 'classifier/share_story.html', {'form': form})
 
-
+@login_required
 def classify_image(request):
     if request.method == 'POST':
         form = ImageUploadForm(request.POST, request.FILES)

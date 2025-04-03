@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voice Chatbot - Lung Cancer Support</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      .pulse-animation {
+        animation: pulse 1.5s infinite;
+      }
+      .typing-indicator::after {
+        content: "...";
+        display: inline-block;
+        width: 20px;
+        overflow: hidden;
+        vertical-align: bottom;
+        animation: typing-dots 1.5s infinite steps(4, end);
+      }
+      @keyframes typing-dots {
+        0%,
+        20% {
+          width: 0;
+        }
+        40% {
+          width: 5px;
+        }
+        60% {
+          width: 10px;
+        }
+        80%,
+        100% {
+          width: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Navigation remains the same as before -->
+    <nav class="bg-white shadow-md sticky top-0 w-full z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+          <a href="/" class="text-2xl font-bold text-gray-800">AdenoClassify</a>
+          <button
+            id="menu-toggle"
+            class="lg:hidden text-gray-800 focus:outline-none"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16m-7 6h7"
+              ></path>
+            </svg>
+          </button>
+          <div id="menu" class="hidden lg:flex space-x-4 items-center">
+            <a href="{% url 'home' %}" class="text-gray-800 hover:text-blue-500"
+              >Home</a
+            >
+            {% if user.is_authenticated %}
+            <a
+              href="{% url 'community' %}"
+              class="text-gray-800 hover:text-blue-500"
+              >Community</a
+            >
+            <a
+              href="{% url 'upload_image' %}"
+              class="text-gray-800 hover:text-blue-500"
+              >Lung Analysis</a
+            >
+            <a
+              href="{% url 'voice_chatbot' %}"
+              class="text-gray-800 hover:text-blue-500 font-semibold"
+              >Chatbot</a
+            >
+            {% else %}
+            <a
+              href="{% url 'index' %}"
+              class="text-gray-800 hover:text-blue-500"
+              >Log In</a
+            >
+            {% endif %}
+          </div>
+          <div class="relative">
+            <button
+              id="account-toggle"
+              class="flex items-center text-gray-800 focus:outline-none"
+            >
+              <i class="fas fa-user-circle text-2xl"></i>
+              {% if user.is_authenticated %}
+              <span class="ml-2">{{ user.username }}</span>
+              {% endif %}
+            </button>
+            <div
+              id="account-dropdown"
+              class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2"
+            >
+              <a
+                href="{% url 'account' %}"
+                class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+              >
+                <i class="fas fa-user mr-2"></i>Account
+              </a>
+              <a
+                href="{% url 'logout' %}"
+                class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+              >
+                <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+              </a>
+            </div>
+          </div>
+        </div>
+        <div
+          id="mobile-menu"
+          class="hidden lg:hidden flex flex-col space-y-2 p-4 bg-white shadow-md"
+        >
+          <a href="{% url 'home' %}" class="text-gray-800 hover:text-blue-500"
+            >Home</a
+          >
+          <a
+            href="{% url 'community' %}"
+            class="text-gray-800 hover:text-blue-500"
+            >Community</a
+          >
+          <a
+            href="{% url 'upload_image' %}"
+            class="text-gray-800 hover:text-blue-500"
+            >Lung Analysis</a
+          >
+          <a
+            href="{% url 'voice_chatbot' %}"
+            class="text-gray-800 hover:text-blue-500 font-semibold"
+            >Chatbot</a
+          >
+        </div>
+      </div>
+    </nav>
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-blue-600 text-white p-6">
+          <h1 class="text-2xl font-bold">Lung Cancer Support Assistant</h1>
+          <p class="opacity-90">
+            Ask me about lung cancer prevention, treatment, diet, or recovery
+          </p>
+        </div>
+
+        <div class="p-4">
+          <div id="status" class="text-center py-2 text-gray-600 italic">
+            Click the microphone button to start speaking
+          </div>
+
+          <div
+            id="chatContainer"
+            class="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50 rounded-lg"
+          >
+            <div class="flex justify-start">
+              <div
+                class="max-w-xs md:max-w-md lg:max-w-lg bg-blue-100 rounded-xl p-4"
+              >
+                <p>
+                  Hello! I'm your Lung Cancer Support Assistant. You can ask me
+                  about:
+                </p>
+                <ul class="list-disc pl-5 mt-2 space-y-1">
+                  <li>Symptoms and diagnosis</li>
+                  <li>Treatment options</li>
+                  <li>Diet and nutrition</li>
+                  <li>Exercise recommendations</li>
+                  <li>Recovery and prevention</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-center items-center mt-6 space-x-4">
+            <button
+              id="startBtn"
+              class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+              <i class="fas fa-microphone text-xl"></i>
+            </button>
+            <button
+              id="stopBtn"
+              class="bg-red-600 hover:bg-red-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 opacity-0 scale-90 disabled:opacity-0 disabled:scale-90 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+              disabled
+            >
+              <i class="fas fa-stop text-xl"></i>
+            </button>
+          </div>
+
+          <div class="mt-4 text-center text-sm text-gray-500">
+            <p>
+              Note: This is an informational assistant and not a substitute for
+              professional medical advice.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let recognition = null;
+      const startBtn = document.getElementById("startBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      const status = document.getElementById("status");
+      const chatContainer = document.getElementById("chatContainer");
+      let isProcessing = false;
+      let lastResponseTime = 0;
+      const RESPONSE_COOLDOWN = 5000; // 5 seconds cooldown between responses
+
+      // Check if browser supports speech recognition
+      if ("webkitSpeechRecognition" in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false; // Changed to false to prevent continuous listening
+        recognition.interimResults = false; // Only final results
+        recognition.lang = "en-US";
+
+        recognition.onstart = () => {
+          status.textContent = "Listening... Speak now";
+          startBtn.classList.add("pulse-animation");
+          startBtn.disabled = true;
+          stopBtn.classList.remove("opacity-0", "scale-90");
+          stopBtn.classList.add("opacity-100", "scale-100");
+          stopBtn.disabled = false;
+        };
+
+        recognition.onend = () => {
+          if (!isProcessing) {
+            status.textContent = "Click the microphone to speak";
+            startBtn.classList.remove("pulse-animation");
+            startBtn.disabled = false;
+            stopBtn.classList.add("opacity-0", "scale-90");
+            stopBtn.classList.remove("opacity-100", "scale-100");
+            stopBtn.disabled = true;
+          }
+        };
+
+        recognition.onresult = (event) => {
+          const now = Date.now();
+          if (now - lastResponseTime < RESPONSE_COOLDOWN) {
+            status.textContent = "Please wait before asking another question";
+            return;
+          }
+
+          const transcript = event.results[0][0].transcript;
+          if (transcript.trim().length > 0) {
+            isProcessing = true;
+            addMessage(transcript, "user");
+            processUserInput(transcript);
+            lastResponseTime = now;
+          }
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Speech recognition error:", event.error);
+          status.textContent = "Error: " + event.error;
+          startBtn.classList.remove("pulse-animation");
+          startBtn.disabled = false;
+          stopBtn.classList.add("opacity-0", "scale-90");
+          stopBtn.classList.remove("opacity-100", "scale-100");
+          stopBtn.disabled = true;
+          isProcessing = false;
+        };
+      } else {
+        status.textContent =
+          "Speech recognition is not supported in your browser";
+        startBtn.disabled = true;
+      }
+
+      startBtn.addEventListener("click", () => {
+        recognition.start();
+      });
+
+      stopBtn.addEventListener("click", () => {
+        recognition.stop();
+      });
+
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `flex ${
+          sender === "user" ? "justify-end" : "justify-start"
+        }`;
+
+        const bubble = document.createElement("div");
+        bubble.className = `max-w-xs md:max-w-md lg:max-w-lg rounded-xl p-4 ${
+          sender === "user"
+            ? "bg-blue-600 text-white rounded-br-none"
+            : "bg-gray-200 text-gray-800 rounded-bl-none"
+        }`;
+        bubble.textContent = text;
+
+        messageDiv.appendChild(bubble);
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      function addTypingIndicator() {
+        const typingDiv = document.createElement("div");
+        typingDiv.className = "flex justify-start";
+
+        const bubble = document.createElement("div");
+        bubble.className =
+          "max-w-xs bg-gray-200 text-gray-800 rounded-xl rounded-bl-none p-4";
+        bubble.innerHTML =
+          '<span class="typing-indicator">Assistant is typing</span>';
+
+        typingDiv.appendChild(bubble);
+        chatContainer.appendChild(typingDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        return typingDiv;
+      }
+
+      function removeTypingIndicator(indicator) {
+        if (indicator && indicator.parentNode) {
+          indicator.parentNode.removeChild(indicator);
+        }
+      }
+
+      function speak(text) {
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel(); // Cancel any ongoing speech
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = 0.9;
+          utterance.pitch = 1;
+          window.speechSynthesis.speak(utterance);
+        }
+      }
+
+      function processUserInput(text) {
+        const typingIndicator = addTypingIndicator();
+
+        // Simulate processing delay
+        setTimeout(() => {
+          removeTypingIndicator(typingIndicator);
+          let response = generateResponse(text.toLowerCase());
+          addMessage(response, "bot");
+          speak(response);
+          isProcessing = false;
+
+          if (recognition && !recognition.isStarted) {
+            status.textContent = "Click the microphone to speak";
+            startBtn.classList.remove("pulse-animation");
+            startBtn.disabled = false;
+            stopBtn.classList.add("opacity-0", "scale-90");
+            stopBtn.classList.remove("opacity-100", "scale-100");
+            stopBtn.disabled = true;
+          }
+        }, 1500);
+      }
+
+      function generateResponse(text) {
+        // Check for greeting first
+        if (
+          text.includes("hello") ||
+          text.includes("hi") ||
+          text.includes("hey")
+        ) {
+          return "Hello! I'm here to help with lung cancer information. What specific information are you looking for today?";
+        }
+
+        // Check for thanks
+        if (text.includes("thank") || text.includes("appreciate")) {
+          return "You're very welcome! Is there anything else I can help you with?";
+        }
+
+        // Determine the most relevant single response
+        if (text.includes("symptom") || text.includes("sign")) {
+          return "Common lung cancer symptoms include persistent cough, chest pain, shortness of breath, coughing up blood, unexplained weight loss, and fatigue. However, early-stage lung cancer often has no symptoms, which is why screening is important for high-risk individuals.";
+        } else if (text.includes("risk") || text.includes("cause")) {
+          return "The primary risk factor for lung cancer is smoking, accounting for 80-90% of cases. Other risks include secondhand smoke, radon exposure, asbestos, air pollution, and family history. Quitting smoking at any age significantly reduces your risk.";
+        } else if (text.includes("treatment") || text.includes("therapy")) {
+          return "Treatment depends on cancer type and stage, and may include surgery, radiation therapy, chemotherapy, targeted therapy, immunotherapy, or a combination. Your oncologist will create a personalized treatment plan based on your specific diagnosis.";
+        } else if (
+          text.includes("diet") ||
+          text.includes("eat") ||
+          text.includes("nutrition")
+        ) {
+          return "For lung cancer patients, focus on high-protein foods, antioxidant-rich fruits and vegetables, healthy fats, and whole grains. Stay hydrated and consider smaller, more frequent meals if treatment affects your appetite. A registered dietitian can provide personalized advice.";
+        } else if (
+          text.includes("exercise") ||
+          text.includes("workout") ||
+          text.includes("physical")
+        ) {
+          return "During treatment, gentle activities like walking and stretching are recommended. After treatment, gradually increase activity as tolerated. Exercise can help with fatigue, lung function, and overall wellbeing. Always consult your doctor before starting any new exercise program.";
+        } else if (text.includes("prevent") || text.includes("avoid")) {
+          return "The best way to prevent lung cancer is to not smoke or quit if you do. Other prevention strategies include avoiding secondhand smoke, testing your home for radon, limiting exposure to carcinogens, eating a healthy diet, and getting regular exercise.";
+        } else {
+          return "I can provide information about lung cancer symptoms, risk factors, treatments, diet, exercise, and prevention. Could you please be more specific about what information you're looking for?";
+        }
+      }
+    </script>
+    <!-- Navigation toggle scripts remain the same -->
+  </body>
+</html>

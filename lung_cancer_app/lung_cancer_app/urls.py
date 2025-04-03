@@ -6,7 +6,7 @@ from classifier.views import (
     classify_image, 
     index,
     register, 
-    symptom_checker, 
+    voice_chatbot, 
     community, 
     home, 
     share_story,
@@ -16,13 +16,13 @@ from classifier.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index, name='index'),
+    path('', home, name='home'),
+    path('index/', index, name='index'),
     path('register/', register, name='register'),
-    path('home/', home, name='home'),
-    path('symptom-checker/', symptom_checker, name='symptom_checker'),  # Hyphen recommended for URLs
+    path('voice-chatbot/', voice_chatbot, name='voice_chatbot'),  
     path('community/', community, name='community'),
-    path('share-story/', share_story, name='share_story'),  # Hyphen recommended
-    path('classify/', classify_image, name='upload_image'),  # Changed from 'classifier/'
+    path('share-story/', share_story, name='share_story'),  
+    path('classify/', classify_image, name='upload_image'), 
     path('account/', account_view, name='account'),
     path('logout/', logout_view, name='logout'),
 ]

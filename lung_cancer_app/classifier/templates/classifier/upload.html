@@ -16,6 +16,110 @@
     </style>
   </head>
   <body>
+    <nav class="bg-white shadow-md sticky top-0 w-full z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+          <a href="/" class="text-2xl font-bold text-gray-800">AdenoClassify</a>
+          <button
+            id="menu-toggle"
+            class="lg:hidden text-gray-800 focus:outline-none"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16m-7 6h7"
+              ></path>
+            </svg>
+          </button>
+          <div id="menu" class="hidden lg:flex space-x-4 items-center">
+            <a href="{% url 'home' %}" class="text-gray-800 hover:text-blue-500"
+              >Home</a
+            >
+            {% if user.is_authenticated %}
+            <a
+              href="{% url 'community' %}"
+              class="text-gray-800 hover:text-blue-500"
+              >Community</a
+            >
+            <a
+              href="{% url 'upload_image' %}"
+              class="text-gray-800 hover:text-blue-500"
+              >Lung Analysis</a
+            >
+            <a
+              href="{% url 'voice_chatbot' %}"
+              class="text-gray-800 hover:text-blue-500 font-semibold"
+              >Chatbot</a
+            >
+            {% else %}
+            <a
+              href="{% url 'index' %}"
+              class="text-gray-800 hover:text-blue-500"
+              >Log In</a
+            >
+            {% endif %}
+          </div>
+          <div class="relative">
+            <button
+              id="account-toggle"
+              class="flex items-center text-gray-800 focus:outline-none"
+            >
+              <i class="fas fa-user-circle text-2xl"></i>
+              {% if user.is_authenticated %}
+              <span class="ml-2">{{ user.username }}</span>
+              {% endif %}
+            </button>
+            <div
+              id="account-dropdown"
+              class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2"
+            >
+              <a
+                href="{% url 'account' %}"
+                class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+              >
+                <i class="fas fa-user mr-2"></i>Account
+              </a>
+              <a
+                href="{% url 'logout' %}"
+                class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+              >
+                <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+              </a>
+            </div>
+          </div>
+        </div>
+        <div
+          id="mobile-menu"
+          class="hidden lg:hidden flex flex-col space-y-2 p-4 bg-white shadow-md"
+        >
+          <a href="{% url 'home' %}" class="text-gray-800 hover:text-blue-500"
+            >Home</a
+          >
+          <a
+            href="{% url 'community' %}"
+            class="text-gray-800 hover:text-blue-500"
+            >Community</a
+          >
+          <a
+            href="{% url 'upload_image' %}"
+            class="text-gray-800 hover:text-blue-500"
+            >Lung Analysis</a
+          >
+          <a
+            href="{% url 'voice_chatbot' %}"
+            class="text-gray-800 hover:text-blue-500 font-semibold"
+            >Chatbot</a
+          >
+        </div>
+      </div>
+    </nav>
     <div
       class="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center"
     >
@@ -137,5 +241,34 @@
         </div>
       </div>
     </div>
+    <script>
+      // Toggle Mobile Menu
+      document
+        .getElementById("menu-toggle")
+        .addEventListener("click", function () {
+          document.getElementById("mobile-menu").classList.toggle("hidden");
+        });
+
+      // Toggle Account Dropdown
+      document
+        .getElementById("account-toggle")
+        .addEventListener("click", function () {
+          document
+            .getElementById("account-dropdown")
+            .classList.toggle("hidden");
+        });
+
+      // Close Dropdown When Clicking Outside
+      document.addEventListener("click", function (event) {
+        const dropdown = document.getElementById("account-dropdown");
+        const button = document.getElementById("account-toggle");
+        if (
+          !button.contains(event.target) &&
+          !dropdown.contains(event.target)
+        ) {
+          dropdown.classList.add("hidden");
+        }
+      });
+    </script>
   </body>
 </html>

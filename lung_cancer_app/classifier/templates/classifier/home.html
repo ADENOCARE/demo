@@ -24,8 +24,6 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
           <a href="/" class="text-2xl font-bold text-gray-800">AdenoClassify</a>
-
-          <!-- Mobile Menu Button -->
           <button
             id="menu-toggle"
             class="lg:hidden text-gray-800 focus:outline-none"
@@ -35,7 +33,6 @@
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 stroke-linecap="round"
@@ -45,12 +42,11 @@
               ></path>
             </svg>
           </button>
-
-          <!-- Navigation Links -->
           <div id="menu" class="hidden lg:flex space-x-4 items-center">
             <a href="{% url 'home' %}" class="text-gray-800 hover:text-blue-500"
               >Home</a
             >
+            {% if user.is_authenticated %}
             <a
               href="{% url 'community' %}"
               class="text-gray-800 hover:text-blue-500"
@@ -62,13 +58,18 @@
               >Lung Analysis</a
             >
             <a
-              href="{% url 'symptom_checker' %}"
-              class="text-gray-800 hover:text-blue-500"
-              >Symptom Checker</a
+              href="{% url 'voice_chatbot' %}"
+              class="text-gray-800 hover:text-blue-500 font-semibold"
+              >Chatbot</a
             >
+            {% else %}
+            <a
+              href="{% url 'index' %}"
+              class="text-gray-800 hover:text-blue-500"
+              >Log In</a
+            >
+            {% endif %}
           </div>
-
-          <!-- Account Dropdown -->
           <div class="relative">
             <button
               id="account-toggle"
@@ -79,8 +80,6 @@
               <span class="ml-2">{{ user.username }}</span>
               {% endif %}
             </button>
-
-            <!-- Dropdown Menu -->
             <div
               id="account-dropdown"
               class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2"
@@ -100,8 +99,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Mobile Menu -->
         <div
           id="mobile-menu"
           class="hidden lg:hidden flex flex-col space-y-2 p-4 bg-white shadow-md"
@@ -120,9 +117,9 @@
             >Lung Analysis</a
           >
           <a
-            href="{% url 'symptom_checker' %}"
-            class="text-gray-800 hover:text-blue-500"
-            >Symptom Checker</a
+            href="{% url 'voice_chatbot' %}"
+            class="text-gray-800 hover:text-blue-500 font-semibold"
+            >Chatbot</a
           >
         </div>
       </div>
@@ -182,16 +179,16 @@
           </p>
           <div class="flex flex-wrap gap-4">
             <a
-              href="/lung_analysis"
+              href="/upload_image"
               class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600"
             >
               Try Lung Analysis
             </a>
             <a
-              href="/symptom_checker"
+              href="/voice_chatbot"
               class="bg-transparent border border-blue-500 text-blue-500 px-6 py-3 rounded-md hover:bg-blue-50"
             >
-              Start Symptom Check
+              Start voice chat
             </a>
           </div>
         </div>
@@ -425,8 +422,8 @@
                 >
               </li>
               <li>
-                <a href="/symptom_checker" class="text-sm hover:text-gray-400"
-                  >Symptom checker</a
+                <a href="/voice_chatbot" class="text-sm hover:text-gray-400"
+                  >Chatbot</a
                 >
               </li>
               <li>
